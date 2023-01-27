@@ -1,8 +1,8 @@
 DROP TABLE if exists public.account_info;
 CREATE TABLE account_info (
     id bigserial PRIMARY KEY,
-    account_name character varying(100) NOT NULL,
-    currency_name character varying(10),
+    account_name character varying(100) NOT NULL CONSTRAINT account_name_must_be_unique UNIQUE,
+    currency_name character varying(10) NOT NULL,
     balance decimal(16,8)
 );
 
