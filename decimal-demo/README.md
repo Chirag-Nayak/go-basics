@@ -1,5 +1,7 @@
 # Read Me
-Demo application to show decimal usage in Go.
+Demo application to show decimal usage in Go. The application demostrates mainly below functions.
+* Basic decimal operations using shopspring's decimal package
+* Basic CRUD operations using PostgresSQL DB for decimal type
 
 ## Prerequisite for the developlent
 * Development envorinment
