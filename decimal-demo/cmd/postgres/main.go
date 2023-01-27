@@ -24,7 +24,7 @@ func init() {
 	cfg := config.LoadConfig()
 
 	// Configure the logger to be used
-	logger = log.New(os.Stdout, "decimal-demo ", log.LstdFlags)
+	logger = log.New(os.Stdout, "decimal-demo-pg ", log.LstdFlags)
 
 	// Open connection to the DB
 	dbClient, err := sql.Open("postgres", cfg.DBConnString)

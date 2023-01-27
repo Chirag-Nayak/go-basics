@@ -10,6 +10,7 @@ import (
 type Config struct {
 	GrpcServerAddress string
 	DBConnString      string
+	MongoDBConnString string
 }
 
 func LoadConfig() (config Config) {
@@ -49,5 +50,12 @@ func LoadConfig() (config Config) {
 	//config.DBConnString = "host=:: port=5432 user=postgres password=postgres dbname=testAssignment sslmode=disable"
 	config.DBConnString = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		dbHost, dbPort, dbUser, dbPass, dbName)
+
+	// Read Mongo DB URI (Have not devided this into multiple params like mongo, but you can if you want)
+	monboDbURI := os.Getenv("MONGO_DB_URI")
+	if len(monboDbURI) <= 0 {
+		panic("MONGO_DB_URI IS NOT SET ! ! !")
+	}
+	config.MongoDBConnString = monboDbURI
 	return
 }

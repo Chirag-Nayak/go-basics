@@ -11,6 +11,7 @@ Demo application to show decimal usage in Go. The application demostrates mainly
 	- decimal (github.com/shopspring/decimal)
 	- godotenv (github.com/joho/godotenv)
 	- Postgress Library (github.com/lib/pq)
+	- MongoDB Library (go.mongodb.org/mongo-driver)
 
 ## Executing the Application
 The API is still in development phase & not production ready, so it is not yet bundled in the docker container,
