@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/Chirag-Nayak/go-basics/web-service/handlers"
+	"github.com/Chirag-Nayak/go-basics/web-service/repository"
+	"github.com/Chirag-Nayak/go-basics/web-service/service"
 )
 
 func main() {
@@ -18,6 +20,13 @@ func main() {
 	hHandler := handlers.NewHello(logger)
 	gHandler := handlers.NewGoodbye(logger)
 
+	// Initialize service & repository to be used for Employee handlers
+	eRepo := repository.NewEmployeeImplInMemory(logger)
+	eService := service.NewEmployee(logger, eRepo)
+
+	// Create employee handler
+	eHandler := handlers.NewEmployee(logger, eService)
+
 	// Create a ServerMux to handle http reuests,
 	// ServeMux also implements http handler interface,
 	// so it can be used with the default http server (with default options) in go as follows
@@ -25,6 +34,7 @@ func main() {
 	sMux := http.NewServeMux()
 	sMux.Handle("/", hHandler)
 	sMux.Handle("/goodbye", gHandler)
+	sMux.Handle("/employee/", eHandler)
 
 	server := &http.Server{
 		Addr:         ":9090",           // Configure the bind address
@@ -37,6 +47,7 @@ func main() {
 
 	// Start a server without blocking the call
 	go func() {
+		logger.Printf("Starting demo web-api server on 9090 port ! ! !")
 		err := server.ListenAndServe()
 		if err != nil {
 			logger.Fatal(err)
@@ -52,8 +63,8 @@ func main() {
 	sig := <-sigChan
 	logger.Println("Sinal received: ", sig)
 
-	//tc := context.WithDeadLine(context.Background(), 30*time.Second)
-	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	logger.Println("Shutting down the server.")
 	server.Shutdown(tc)
