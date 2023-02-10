@@ -26,28 +26,12 @@ func NewEmployee(l *log.Logger, eServ *service.Employee) *Employee {
 
 func (e *Employee) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		id, err := e.getIDFromURL(r.URL.Path)
-		if err != nil {
-			http.Error(w, "Error while getting ID from URL", http.StatusBadRequest)
-			return
-		}
-		if id == -1 {
-			// If ID is not present in the URL, return all the employees
-			e.getEmployees(w, r)
-		} else {
-			e.getEmployeeByID(id, w, r)
-		}
+		e.GetEmployees(w, r)
 	} else if r.Method == http.MethodPost {
-		e.addEmployee(w, r)
+		e.AddEmployee(w, r)
 	} else if r.Method == http.MethodPut {
 		e.logger.Println("PUT request: ", r.URL.Path)
-		// expect the id in the URI & get the ID
-		id, err := e.getIDFromURL(r.URL.Path)
-		if err != nil {
-			http.Error(w, "Invalid URI", http.StatusBadRequest)
-			return
-		}
-		e.updateEmployee(id, w, r)
+		e.UpdateEmployee(w, r)
 	} else if r.Method == http.MethodDelete {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	} else {
@@ -55,12 +39,72 @@ func (e *Employee) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (e *Employee) GetEmployees(w http.ResponseWriter, r *http.Request) {
+	id, err := e.getIDFromURL(r.URL.Path)
+	if err != nil {
+		http.Error(w, "Error while getting ID from URL", http.StatusBadRequest)
+		return
+	}
+	if id == -1 {
+		// If ID is not present in the URL, return all the employees
+		e.getAllEmployees(w, r)
+	} else {
+		e.getEmployeeByID(id, w, r)
+	}
+}
+
+// Add new employee to the data store by handling POST requests
+func (e *Employee) AddEmployee(w http.ResponseWriter, r *http.Request) {
+	e.logger.Println("Received POST request on the employee URI.")
+
+	emp := &model.Employee{}
+	err := emp.FromJSON(r.Body)
+	if err != nil {
+		e.logger.Printf("Error while decoding employee data from POST request: %#+v\n", err)
+		http.Error(w, "Unable to marshal JSON from POST request", http.StatusBadRequest)
+		return
+	}
+
+	e.eService.AddEmployee(r.Context(), emp)
+	w.WriteHeader(http.StatusCreated)
+}
+
+// Update employee informations by handling PUT request
+func (e *Employee) UpdateEmployee(w http.ResponseWriter, r *http.Request) {
+	e.logger.Println("Received PUT request on the employee URI.")
+
+	// expect the id in the URI & get the ID
+	id, err := e.getIDFromURL(r.URL.Path)
+	if err != nil {
+		http.Error(w, "Invalid URI", http.StatusBadRequest)
+		return
+	}
+
+	emp := &model.Employee{}
+	err = emp.FromJSON(r.Body)
+	if err != nil {
+		e.logger.Printf("Error while decoding employee data from POST request: %#+v\n", err)
+		http.Error(w, "Unable to marshal JSON from POST request", http.StatusBadRequest)
+		return
+	}
+
+	_, err = e.eService.UpdateEmployee(r.Context(), id, emp)
+	if err == repository.ErrRecordNotFound {
+		http.Error(w, "Employee with given ID not found", http.StatusNotFound)
+		return
+	} else if err != nil {
+		http.Error(w, "Error while updating the Employee with given ID", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 // ---------------------------------------------------------------
 // Package only methods
 // ---------------------------------------------------------------
 
 // Retrieve all the employees from the data store & send them as JSON response
-func (e *Employee) getEmployees(w http.ResponseWriter, r *http.Request) {
+func (e *Employee) getAllEmployees(w http.ResponseWriter, r *http.Request) {
 	e.logger.Println("Received GET request on the employee URI.")
 	emps, err := e.eService.GetAll(r.Context())
 	if err != nil {
@@ -93,45 +137,6 @@ func (e *Employee) getEmployeeByID(id int64, w http.ResponseWriter, r *http.Requ
 		http.Error(w, "Unable to marshal JSON", http.StatusInternalServerError)
 		return
 	}
-}
-
-// Add new employee to the data store by handling POST requests
-func (e *Employee) addEmployee(w http.ResponseWriter, r *http.Request) {
-	e.logger.Println("Received POST request on the employee URI.")
-
-	emp := &model.Employee{}
-	err := emp.FromJSON(r.Body)
-	if err != nil {
-		e.logger.Printf("Error while decoding employee data from POST request: %#+v\n", err)
-		http.Error(w, "Unable to marshal JSON from POST request", http.StatusBadRequest)
-		return
-	}
-
-	e.eService.AddEmployee(r.Context(), emp)
-	w.WriteHeader(http.StatusCreated)
-}
-
-// Update employee informations by handling PUT request
-func (e *Employee) updateEmployee(id int64, w http.ResponseWriter, r *http.Request) {
-	e.logger.Println("Received PUT request on the employee URI.")
-
-	emp := &model.Employee{}
-	err := emp.FromJSON(r.Body)
-	if err != nil {
-		e.logger.Printf("Error while decoding employee data from POST request: %#+v\n", err)
-		http.Error(w, "Unable to marshal JSON from POST request", http.StatusBadRequest)
-		return
-	}
-
-	_, err = e.eService.UpdateEmployee(r.Context(), id, emp)
-	if err == repository.ErrRecordNotFound {
-		http.Error(w, "Employee with given ID not found", http.StatusNotFound)
-		return
-	} else if err != nil {
-		http.Error(w, "Error while updating the Employee with given ID", http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
 }
 
 func (e *Employee) getIDFromURL(urlPath string) (int64, error) {
