@@ -12,16 +12,20 @@ import (
 	"github.com/Chirag-Nayak/go-basics/web-service/service"
 )
 
+type GetIDFromReq func(*http.Request, *log.Logger) (int64, error)
+
 type Employee struct {
-	logger   *log.Logger
-	eService *service.Employee
+	logger    *log.Logger
+	eService  *service.Employee
+	getIdFunc GetIDFromReq
 }
 
 func NewEmployee(l *log.Logger, eServ *service.Employee) *Employee {
-	return &Employee{
-		logger:   l,
-		eService: eServ,
-	}
+	emp := Employee{}
+	emp.eService = eServ
+	emp.logger = l
+	emp.getIdFunc = getIDFromRequest_golib
+	return &emp
 }
 
 func (e *Employee) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +44,7 @@ func (e *Employee) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *Employee) GetEmployees(w http.ResponseWriter, r *http.Request) {
-	id, err := e.getIDFromURL(r.URL.Path)
+	id, err := e.getIdFunc(r, e.logger)
 	if err != nil {
 		http.Error(w, "Error while getting ID from URL", http.StatusBadRequest)
 		return
@@ -74,7 +78,7 @@ func (e *Employee) UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 	e.logger.Println("Received PUT request on the employee URI.")
 
 	// expect the id in the URI & get the ID
-	id, err := e.getIDFromURL(r.URL.Path)
+	id, err := e.getIdFunc(r, e.logger)
 	if err != nil {
 		http.Error(w, "Invalid URI", http.StatusBadRequest)
 		return
@@ -139,27 +143,29 @@ func (e *Employee) getEmployeeByID(id int64, w http.ResponseWriter, r *http.Requ
 	}
 }
 
-func (e *Employee) getIDFromURL(urlPath string) (int64, error) {
+// Get employee ID from the request using built-in go libraries
+func getIDFromRequest_golib(r *http.Request, l *log.Logger) (int64, error) {
+	l.Println("Getting ID from the request using built-in Go Libraries.")
 	reg, err := regexp.Compile(`/([0-9]+)`)
 	if err != nil {
-		e.logger.Printf("Unable to compile regex, ID may not be present in the URI, err: %#+v\n", err)
+		l.Printf("Unable to compile regex, ID may not be present in the URI, err: %#+v\n", err)
 		return -1, nil
 	}
 
-	g := reg.FindAllStringSubmatch(urlPath, -1)
+	g := reg.FindAllStringSubmatch(r.URL.Path, -1)
 
 	if len(g) == 0 {
-		e.logger.Println("ID is not available in the URL")
+		l.Println("ID is not available in the URL")
 		return -1, nil
 	}
 
 	if len(g) != 1 {
-		e.logger.Println("Invalid URI more than one id")
+		l.Println("Invalid URI more than one id")
 		return -1, errors.New("invalid URI more than one id")
 	}
 
 	if len(g[0]) != 2 {
-		e.logger.Println("Invalid URI more than one capture group")
+		l.Println("Invalid URI more than one capture group")
 		return -1, errors.New("invalid URI more than one capture group")
 	}
 
@@ -167,7 +173,7 @@ func (e *Employee) getIDFromURL(urlPath string) (int64, error) {
 	// Parse the string ID as a decimal (10 base) 64 bit Integer
 	id, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
-		e.logger.Printf("Invalid URI unable to convert ID:%s to int64, err: %#+v\n", idString, err)
+		l.Printf("Invalid URI unable to convert ID:%s to int64, err: %#+v\n", idString, err)
 		return -1, errors.New("invalid URI string to int64 parsing error")
 	}
 	return id, nil

@@ -11,13 +11,12 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{BASE_URL}}/employee/",
+					"raw": "{{BASE_URL}}/employee",
 					"host": [
 						"{{BASE_URL}}"
 					],
 					"path": [
-						"employee",
-						""
+						"employee"
 					]
 				}
 			},
