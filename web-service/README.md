@@ -1,7 +1,7 @@
 # Read Me
 Demo application to show how you can create a web service (REST API end-point) in Go. The application mainly demonstrates: 
 * Creating REST API using Built-In Go Libraries (Using http handlers)
-* Creating REST API using Gorilla framework (Utilizing the same http handlers by using a modified version of "Template Method" design pattern by having a function type inside a struct)
+* Creating REST API using Gorilla framework (Utilizing the same http handlers by having a function type inside a struct)
 
 ## Prerequisite for the developlent
 * Development envorinment
