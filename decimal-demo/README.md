@@ -2,6 +2,8 @@
 Demo application to show decimal usage in Go. The application demostrates mainly below functions.
 * Basic decimal operations using shopspring's decimal package
 * Basic CRUD operations using PostgresSQL DB for decimal type
+* Basic CRUD operations using MongoDB for decimal type
+	- Work In Progress / Not fully working, because of the Open Issue in shopspring's decimal package. [Issue#168](https://github.com/shopspring/decimal/issues/168)
 
 ## Prerequisite for the developlent
 * Development envorinment
@@ -26,6 +28,10 @@ to execute the API please do following steps:
 * Build & start the demo application.
 	- To execute the demo with PostgreSQL DB, execute the [main.go](./cmd/postgres/main.go), from the application's root directory (that is where the go.mod file is located) using below command. 
 ```
-	go run ./cmd/postgres/main.go
+	go build -o demo.exe .\cmd\postgres\main.go; if($?)  { .\demo.exe }
 ```
 
+	- To execute the demo with MongoDB, execute the [main.go](./cmd/mongo/main.go), from the application's root directory (that is where the go.mod file is located) using below command. 
+```
+	go build -o demo.exe .\cmd\mongo\main.go; if($?)  { .\demo.exe }
+```
