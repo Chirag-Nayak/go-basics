@@ -12,6 +12,11 @@ import (
 	"github.com/Chirag-Nayak/go-basics/web-service/service"
 )
 
+// GenericError is a generic error message returned by a server
+type GenericError struct {
+	Message string `json:"message"`
+}
+
 type GetIDFromReq func(*http.Request, *log.Logger) (int64, error)
 
 type Employee struct {
@@ -43,6 +48,7 @@ func (e *Employee) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Retreive list of employees or a single employee based on the URL
 func (e *Employee) GetEmployees(w http.ResponseWriter, r *http.Request) {
 	id, err := e.getIdFunc(r, e.logger)
 	if err != nil {
@@ -56,6 +62,12 @@ func (e *Employee) GetEmployees(w http.ResponseWriter, r *http.Request) {
 		e.getEmployeeByID(id, w, r)
 	}
 }
+
+// swagger:route POST /employee Employees addEmployee
+// Add new employee information to the database
+// responses:
+//	201: noContentResponse
+//	400: errorResponse
 
 // Add new employee to the data store by handling POST requests
 func (e *Employee) AddEmployee(w http.ResponseWriter, r *http.Request) {
@@ -72,6 +84,12 @@ func (e *Employee) AddEmployee(w http.ResponseWriter, r *http.Request) {
 	e.eService.AddEmployee(r.Context(), emp)
 	w.WriteHeader(http.StatusCreated)
 }
+
+// swagger:route PUT /employee/{id} Employees updateEmployee
+// Update an existing employee information in the database
+// responses:
+//	201: noContentResponse
+//	400: errorResponse
 
 // Update employee informations by handling PUT request
 func (e *Employee) UpdateEmployee(w http.ResponseWriter, r *http.Request) {

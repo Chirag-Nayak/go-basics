@@ -2,6 +2,7 @@
 Demo application to show how you can create a web service (REST API end-point) in Go. The application mainly demonstrates: 
 * Creating REST API using Built-In Go Libraries (Using http handlers)
 * Creating REST API using Gorilla framework (Utilizing the same http handlers by having a function type inside a struct)
+* Documenting the API end-point using Swagger
 
 ## Prerequisite for the developlent
 * Development envorinment
@@ -26,5 +27,10 @@ to execute the API please follow below steps:
 	go build -o web-service.exe .\cmd\gorilla\main.go; if($?)  { .\web-service.exe }
 ```
 
+## API Documentation
+Swagger documentation can be viewed using the ReDoc UI in your browser at [http://localhost:9090/docs](http://localhost:9090/docs).
+
 ## Testing the Application
 You can use any 3rd party tool of your choice, I am using Postman for my testing. And I have also uploaded the Postman's collection [here](./TestEmployeeAPI.postman_collection.json) in case if you want to test using Postman.
+
+

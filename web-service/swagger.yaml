@@ -1,0 +1,140 @@
+basePath: /
+consumes:
+    - application/json
+definitions:
+    Employee:
+        description: Employee defines an employee structure
+        properties:
+            email:
+                type: string
+                x-go-name: Email
+                x-order: "3"
+            firstName:
+                type: string
+                x-go-name: FirstName
+                x-order: "1"
+            id:
+                format: int64
+                type: integer
+                x-go-name: ID
+                x-order: "0"
+            joinDate:
+                type: string
+                x-go-name: JoinDate
+                x-order: "4"
+            lastName:
+                type: string
+                x-go-name: LastName
+                x-order: "2"
+        type: object
+        x-go-package: github.com/Chirag-Nayak/go-basics/web-service/model
+    GenericError:
+        description: GenericError is a generic error message returned by a server
+        properties:
+            message:
+                type: string
+                x-go-name: Message
+        type: object
+        x-go-package: github.com/Chirag-Nayak/go-basics/web-service/handlers
+info:
+    description: Documentation for Employee API
+    title: Employee API
+    version: 1.0.0
+paths:
+    /employee:
+        get:
+            description: Return list of employees from the database
+            operationId: listEmployee
+            responses:
+                "200":
+                    $ref: '#/responses/employeesResponse'
+            tags:
+                - Employees
+        post:
+            description: Add new employee information to the database
+            operationId: addEmployee
+            parameters:
+                - description: |-
+                    Employee data structure to Update or Create.
+                    Note: the id field is ignored by update and create operations
+                  in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/Employee'
+            responses:
+                "201":
+                    $ref: '#/responses/noContentResponse'
+                "400":
+                    $ref: '#/responses/errorResponse'
+            tags:
+                - Employees
+    /employee/{id}:
+        get:
+            description: Return a single employee information from the database
+            operationId: getEmployee
+            parameters:
+                - description: The id of the employee for which the operation relates
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+            responses:
+                "200":
+                    $ref: '#/responses/employeeResponse'
+                "400":
+                    $ref: '#/responses/errorResponse'
+                "500":
+                    $ref: '#/responses/errorResponse'
+            tags:
+                - Employees
+        put:
+            description: Update an existing employee information in the database
+            operationId: updateEmployee
+            parameters:
+                - description: The id of the employee for which the operation relates
+                  format: int64
+                  in: path
+                  name: id
+                  required: true
+                  type: integer
+                  x-go-name: ID
+                - description: |-
+                    Employee data structure to Update or Create.
+                    Note: the id field is ignored by update and create operations
+                  in: body
+                  name: Body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/Employee'
+            responses:
+                "201":
+                    $ref: '#/responses/noContentResponse'
+                "400":
+                    $ref: '#/responses/errorResponse'
+            tags:
+                - Employees
+produces:
+    - application/json
+responses:
+    employeeResponse:
+        description: Data structure representing a single employee
+        schema:
+            $ref: '#/definitions/Employee'
+    employeesResponse:
+        description: A list of employees
+        schema:
+            items:
+                $ref: '#/definitions/Employee'
+            type: array
+    errorResponse:
+        description: Generic error message returned as a string
+        schema:
+            $ref: '#/definitions/GenericError'
+    noContentResponse:
+        description: No content is returned by this API endpoint
+schemes:
+    - http
+swagger: "2.0"

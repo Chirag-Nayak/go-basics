@@ -9,6 +9,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-openapi/runtime/middleware"
+
 	"github.com/gorilla/mux"
 
 	"github.com/Chirag-Nayak/go-basics/web-service/handlers"
@@ -43,6 +45,13 @@ func main() {
 	empRoute.HandleFunc("/{id:[0-9]+}", eHandler.GetEmployees).Methods("GET")   // Handle GET on /employee/{id}
 	empRoute.HandleFunc("/", eHandler.AddEmployee).Methods("POST")              // Handle POST on /employee/
 	empRoute.HandleFunc("/{id:[0-9]+}", eHandler.UpdateEmployee).Methods("PUT") // Handle PUT on /employee/{id}
+
+	// Add handlers for documentation of API
+	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
+	sh := middleware.Redoc(opts, nil)
+
+	sMux.Handle("/docs", sh).Methods("GET")
+	sMux.Handle("/swagger.yaml", http.FileServer(http.Dir("./"))).Methods("GET")
 
 	server := &http.Server{
 		Addr:         ":9090",           // Configure the bind address

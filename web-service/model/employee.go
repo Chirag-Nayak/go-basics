@@ -5,12 +5,28 @@ import (
 	"io"
 )
 
+// Employee defines an employee structure
+// swagger:model
 type Employee struct {
-	ID        int64  `json:"id"`
+	// Extensions:
+	// x-order: "0"
+	ID int64 `json:"id"`
+
+	// Extensions:
+	// x-order: "1"
 	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Email     string `json:"email"`
-	JoinDate  string `json:"joinDate"`
+
+	// Extensions:
+	// x-order: "2"
+	LastName string `json:"lastName"`
+
+	// Extensions:
+	// x-order: "3"
+	Email string `json:"email"`
+
+	// Extensions:
+	// x-order: "4"
+	JoinDate string `json:"joinDate"`
 }
 
 type Employees []*Employee
